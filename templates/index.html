@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Dynamic Component Diagram</title>
+</head>
+
+<body>
+    <h1>Generate PlantUML Component Diagram</h1>
+    <form method="post">
+        <label for="num_entities">Enter the number of entities:</label>
+        <input type="number" id="num_entities" name="num_entities" required min="1"><br><br>
+
+        <div id="entity_inputs"></div>
+
+        <h2>Define Interfaces:</h2>
+        <div id="interface_inputs"></div>
+
+        <h2>Define Connections:</h2>
+        <div id="connection_inputs"></div>
+        <button type="button" id="add_connection_button">Add Connection</button><br><br>
+
+        <input type="submit" value="Generate Diagram">
+    </form>
+
+    <div id="diagramContainer"></div>
+
+    <script>
+        document.getElementById("num_entities").addEventListener("change", function () {
+            const numEntities = parseInt(this.value);
+            const entityInputs = document.getElementById("entity_inputs");
+            entityInputs.innerHTML = "";
+
+            // ... (Rest of the previous JavaScript code)
+
+            // Create connection input fields based on the number of entities
+            const connectionInputs = document.getElementById("connection_inputs");
+            connectionInputs.innerHTML = "";
+
+            // Calculate the number of connections based on the number of entities
+            const numConnections = numEntities * (numEntities - 1) / 2;
+
+            for (let i = 1; i <= numConnections; i++) {
+                const fromLabel = document.createElement("label");
+                fromLabel.textContent = `Enter the source entity for connection ${i}: `;
+                const fromInput = document.createElement("input");
+                fromInput.type = "text";
+                fromInput.name = `from_${i}`;
+                fromInput.required = true;
+                const toLabel = document.createElement("label");
+                toLabel.textContent = `Enter the target entity for connection ${i}: `;
+                const toInput = document.createElement("input");
+                toInput.type = "text";
+                toInput.name = `to_${i}`;
+                toInput.required = true;
+
+                connectionInputs.appendChild(fromLabel);
+                connectionInputs.appendChild(fromInput);
+                connectionInputs.appendChild(document.createElement("br"));
+                connectionInputs.appendChild(toLabel);
+                connectionInputs.appendChild(toInput);
+                connectionInputs.appendChild(document.createElement("br"));
+            }
+        });
+        document.getElementById("num_entities").addEventListener("change", function () {
+            const numEntities = parseInt(this.value);
+            const entityInputs = document.getElementById("entity_inputs");
+            entityInputs.innerHTML = "";
+
+            for (let i = 1; i <= numEntities; i++) {
+                const label = document.createElement("label");
+                label.textContent = `Enter the name of entity ${i}: `;
+                const input = document.createElement("input");
+                input.type = "text";
+                input.name = `entity_${i}`;
+                input.required = true;
+
+                entityInputs.appendChild(label);
+                entityInputs.appendChild(input);
+                entityInputs.appendChild(document.createElement("br"));
+
+                // Create interface input fields for each entity
+                const interfaceInputs = document.getElementById("interface_inputs");
+                const interfaceLabel = document.createElement("label");
+                interfaceLabel.textContent = `Enter the name of the interface provided by entity ${i}: `;
+                const interfaceInput = document.createElement("input");
+                interfaceInput.type = "text";
+                interfaceInput.name = `interface_${i}`;
+                const providesCheckbox = document.createElement("input");
+                providesCheckbox.type = "checkbox";
+                providesCheckbox.name = `provides_${i}`;
+                providesCheckbox.value = "true";
+                const providesLabel = document.createElement("label");
+                providesLabel.textContent = "Provides";
+                providesLabel.appendChild(providesCheckbox);
+                const requiresCheckbox = document.createElement("input");
+                requiresCheckbox.type = "checkbox";
+                requiresCheckbox.name = `requires_${i}`;
+                requiresCheckbox.value = "true";
+                const requiresLabel = document.createElement("label");
+                requiresLabel.textContent = "Requires";
+                requiresLabel.appendChild(requiresCheckbox);
+
+                interfaceInputs.appendChild(interfaceLabel);
+                interfaceInputs.appendChild(interfaceInput);
+                interfaceInputs.appendChild(document.createElement("br"));
+                interfaceInputs.appendChild(providesLabel);
+                interfaceInputs.appendChild(requiresLabel);
+                interfaceInputs.appendChild(document.createElement("br"));
+            }
+
+
+        });
+        const addConnectionButton = document.getElementById("add_connection_button");
+        const connectionInputs = document.getElementById("connection_inputs");
+        let connectionCounter = 1;
+
+        addConnectionButton.addEventListener("click", function () {
+            const fromLabel = document.createElement("label");
+            fromLabel.textContent = `Enter the source entity for connection ${connectionCounter}: `;
+            const fromInput = document.createElement("input");
+            fromInput.type = "text";
+            fromInput.name = `from_${connectionCounter}`;
+            fromInput.required = true;
+            const toLabel = document.createElement("label");
+            toLabel.textContent = `Enter the target entity for connection ${connectionCounter}: `;
+            const toInput = document.createElement("input");
+            toInput.type = "text";
+            toInput.name = `to_${connectionCounter}`;
+            toInput.required = true;
+
+            connectionInputs.appendChild(fromLabel);
+            connectionInputs.appendChild(fromInput);
+            connectionInputs.appendChild(document.createElement("br"));
+            connectionInputs.appendChild(toLabel);
+            connectionInputs.appendChild(toInput);
+            connectionInputs.appendChild(document.createElement("br"));
+
+            connectionCounter++;
+        });
+        document.querySelector("form").addEventListener("submit", function (event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+
+            fetch("/", {
+                method: "POST",
+                body: formData,
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const diagramContainer = document.getElementById("diagramContainer");
+                    diagramContainer.innerHTML = `<img src="data:image/png;base64,${data.base64_image}" alt="Component Diagram">`;
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+        });
+        // ... (Submit form and fetch as before)
+    </script>
+</body>
+
+</html>
